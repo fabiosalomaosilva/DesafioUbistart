@@ -50,6 +50,7 @@ namespace DesafioUbistart.Controllers
             {
                 if (ModelState.IsValid)
                 {
+                    registerViewModel.RoleId = 2;
                     var user = await _accountService.Register(registerViewModel);
                     if (user == null) return BadRequest("O registro de usuário encontrou um erro. Tente novamente");
                     return Ok(user);

@@ -10,8 +10,10 @@ namespace DesafioUbistart.Repositories
         Task<Todo> ConcludeAsync(int todoId);
         Task DeleteAsync(int todoId);
         Task<Todo> EditAsync(Todo todo, int todoId);
-        Task<bool> ExistsTodo(int todoId);
-        Task<List<Todo>> GetAllAsync(string searchString, int? pageNumber = 0, int pageSize = 15);
+        Task<bool> ExistsTodoAsync(int todoId);
+        Task<Todo> Get(int todoId);
+        Task<List<Todo>> GetAllAsync();
         Task<List<Todo>> GetAllByUserAsync(int userId);
+        Task<List<Todo>> GetAllExpiredAsync();
     }
 }

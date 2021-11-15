@@ -7,10 +7,8 @@ namespace DesafioUbistart.ViewModels
     {
         [MaxLength(255, ErrorMessage = "Campo Descrição pode ter no máximo {0} caracteres")]
         [Required(ErrorMessage = "O campo Descrição é obrigatório")]
-        [Display(Name = "Descrição")]
         public string Description { get; set; }
 
-        [Display(Name = "Vencimento")]
         public DateTime ExpirationDate { get; set; }
 
     }
@@ -31,10 +29,20 @@ namespace DesafioUbistart.ViewModels
     {
         public int Id { get; set; }
 
+        [MaxLength(255, ErrorMessage = "Campo Descrição pode ter no máximo {0} caracteres")]
+        [Required(ErrorMessage = "O campo Descrição é obrigatório")]
         public string Description { get; set; }
 
         public DateTime ExpirationDate { get; set; }
         public string Email { get; set; }
+
+    }
+
+    public class TodoDoneViewModel
+    {
+        public int TodoId { get; set; }
+        public bool TaskCompleted { get; set; }
+
 
     }
 }

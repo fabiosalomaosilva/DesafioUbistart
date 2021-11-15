@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace DesafioUbistart.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = RoleTypes.Admin)]
     [Route("api/[controller]")]
     [ApiController]
     public class TodosController : ControllerBase
@@ -21,6 +21,22 @@ namespace DesafioUbistart.Controllers
             _todoService = todoService;
         }
 
+        [HttpGet]
+        public async Task<ActionResult> Get()
+        {
+            try
+            {
+                var userId = Convert.ToInt32(User.Claims.FirstOrDefault(x => x.Type == "ClientId").Value);
+                var listaTodos = await _todoService.GetAllByUser(userId);
+
+                return Ok(listaTodos);
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPost]
         public async Task<ActionResult> Post(TodoEditViewModel todoEditViewModel)
         {
@@ -28,8 +44,8 @@ namespace DesafioUbistart.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    var id = Convert.ToInt32(User.Claims.FirstOrDefault(x => x.Type == "ClientId").Value);
-                    var todo = await _todoService.Add(todoEditViewModel, id);
+                    var userId = Convert.ToInt32(User.Claims.FirstOrDefault(x => x.Type == "ClientId").Value);
+                    var todo = await _todoService.Add(todoEditViewModel, userId);
 
                     return Ok(todo);
                 }
@@ -41,5 +57,76 @@ namespace DesafioUbistart.Controllers
             }
         }
 
+        [HttpPut("{id}")]
+        public async Task<ActionResult> Put(int id, TodoEditViewModel todoEditViewModel)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var userId = Convert.ToInt32(User.Claims.FirstOrDefault(x => x.Type == "ClientId").Value);
+                    var todo = await _todoService.Edit(todoEditViewModel, id, userId);
+
+                    return Ok(todo);
+                }
+                return BadRequest("Dados do Todo não foram informados.");
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut]
+        public async Task<ActionResult> Put(TodoDoneViewModel todoDoneViewModel)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    if (!todoDoneViewModel.TaskCompleted)
+                    {
+                        return BadRequest("Tarefa não concluída. Dados enviados de forma errada.");
+                    }
+                    await _todoService.ConcludeTodo(todoDoneViewModel.TodoId);
+
+                    return Ok("Tarefa concluída com sucesso!");
+                }
+                return BadRequest("Dados do Todo não foram informados.");
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var userId = Convert.ToInt32(User.Claims.FirstOrDefault(x => x.Type == "ClientId").Value);
+                    var deleted = await _todoService.Delete(id, userId);
+
+                    if (deleted)
+                    {
+                        return Ok("Tarefa excluída com sucesso!");
+                    }
+                    else
+                    {
+                        return BadRequest("Tarefa não pertence ao usuário.");
+                    }
+                }
+                return BadRequest("Dados do Todo não foram informados.");
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
     }
+
 }

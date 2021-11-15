@@ -1,6 +1,7 @@
 ﻿using DesafioUbistart.Data;
 using DesafioUbistart.Models;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,18 +17,24 @@ namespace DesafioUbistart.Repositories
             _db = db;
         }
 
-        public async Task<List<Todo>> GetAllAsync(string searchString, int? pageNumber = 0, int pageSize = 15)
+        public async Task<Todo> Get(int todoId)
         {
-            var listaTodos = new List<Todo>();
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                listaTodos = await _db.Todos.Include(i => i.User).AsNoTracking().Where(p => p.Description.Contains(searchString)).ToListAsync();
-            }
-
-            return await PaginatedList<Todo>.CreateAsync(listaTodos.AsQueryable().AsNoTracking(), pageNumber ?? 1, pageSize);
+            return await _db.Todos.FirstOrDefaultAsync(p => p.Id == todoId);
         }
 
-        public async Task<bool> ExistsTodo(int todoId)
+        public async Task<List<Todo>> GetAllAsync()
+        {
+            var listaTodos = new List<Todo>();
+            return await _db.Todos.Include(i => i.User).AsNoTracking().ToListAsync();
+        }
+
+        public async Task<List<Todo>> GetAllExpiredAsync()
+        {
+            var listaTodos = new List<Todo>();
+            return await _db.Todos.Include(i => i.User).AsNoTracking().Where(p => p.ExpirationDate > DateTime.UtcNow).ToListAsync();
+        }
+
+        public async Task<bool> ExistsTodoAsync(int todoId)
         {
             return await _db.Todos.AnyAsync(p => p.Id == todoId);
         }
@@ -40,6 +47,10 @@ namespace DesafioUbistart.Repositories
         public async Task<Todo> Add(Todo todo)
         {
             if (string.IsNullOrEmpty(todo.Description)) return null;
+            if (todo.ExpirationDate != null)
+            {
+                todo.ExpirationDate = ((DateTime)todo.ExpirationDate).ToUniversalTime();
+            }
             _db.Todos.Add(todo);
             await _db.SaveChangesAsync();
             return todo;
@@ -49,7 +60,13 @@ namespace DesafioUbistart.Repositories
         {
             if (todo.Done) return null;
             var obj = await _db.Todos.FindAsync(todoId);
-            obj.LastUpdateDate = System.DateTime.UtcNow;
+            if (todo.ExpirationDate != null)
+            {
+                obj.ExpirationDate = ((DateTime)todo.ExpirationDate).ToUniversalTime();
+            }
+
+            obj.Description = todo.Description;
+            obj.LastUpdateDate = DateTime.UtcNow;
             _db.Entry(obj).State = EntityState.Modified;
             await _db.SaveChangesAsync();
 
@@ -61,7 +78,7 @@ namespace DesafioUbistart.Repositories
             var todo = await _db.Todos.FindAsync(todoId);
             if (todo.Done) return null;
             todo.Done = true;
-            todo.ExpirationDate = System.DateTime.UtcNow;
+            todo.DateOfDone = DateTime.UtcNow;
             _db.Entry(todo).State = EntityState.Modified;
             await _db.SaveChangesAsync();
 
