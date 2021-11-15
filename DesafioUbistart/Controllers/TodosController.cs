@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace DesafioUbistart.Controllers
 {
-    [Authorize(Roles = RoleTypes.Admin)]
+    [Authorize(Roles = RoleTypes.All)]
     [Route("api/[controller]")]
     [ApiController]
     public class TodosController : ControllerBase
@@ -64,6 +64,8 @@ namespace DesafioUbistart.Controllers
             {
                 if (ModelState.IsValid)
                 {
+                    if (!await _todoService.IsExistsAsync(id)) return BadRequest("Tarefa não existe no banco de dados");
+                    if (await _todoService.IsDoneAsync(id)) return BadRequest("Tarefa não pode ser modificada. Tarefa já concluída.");
                     var userId = Convert.ToInt32(User.Claims.FirstOrDefault(x => x.Type == "ClientId").Value);
                     var todo = await _todoService.Edit(todoEditViewModel, id, userId);
 

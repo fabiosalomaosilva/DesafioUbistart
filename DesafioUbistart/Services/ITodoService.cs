@@ -10,8 +10,10 @@ namespace DesafioUbistart.Services
         Task ConcludeTodo(int todoId);
         Task<bool> Delete(int todoId, int userId);
         Task<TodoViewModel> Edit(TodoEditViewModel todoVm, int todoId, int userId);
-        Task<PaginatedList<TodoAdminViewModel>> GetAll(int pageNumber = 0, int pageSize = 15);
+        Task<PaginatedList<TodoAdminViewModel>> GetAll(int pageNumber = 1, int pageSize = 15);
         Task<List<TodoViewModel>> GetAllByUser(int userId);
-        Task<PaginatedList<TodoAdminViewModel>> GetAllExpired(int pageNumber = 0, int pageSize = 15);
+        Task<PaginatedList<TodoAdminViewModel>> GetAllExpired(int pageNumber, int pageSize);
+        Task<bool> IsDoneAsync(int todoId);
+        Task<bool> IsExistsAsync(int todoId);
     }
 }

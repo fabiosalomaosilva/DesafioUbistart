@@ -30,11 +30,11 @@ namespace DesafioUbistart.Controllers
                 PaginatedList<TodoAdminViewModel> listaTodos = null;
                 if (todosExpired)
                 {
-                    listaTodos = await _todoService.GetAllExpired(pageNumber, pageNumber);
+                    listaTodos = await _todoService.GetAllExpired(pageNumber, pageSize);
                 }
                 else
                 {
-                    listaTodos = await _todoService.GetAll(pageNumber, pageNumber);
+                    listaTodos = await _todoService.GetAll(pageNumber, pageSize);
 
                 }
 

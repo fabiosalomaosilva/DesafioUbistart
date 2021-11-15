@@ -25,29 +25,30 @@ namespace DesafioUbistart.Services
 
         public async Task<PaginatedList<TodoAdminViewModel>> GetAll(int pageNumber = 1, int pageSize = 15)
         {
-            var listaTodos = (await _repository.GetAllExpiredAsync()).Select(s => new TodoAdminViewModel
+            if (pageSize == 0) pageSize = 15;
+            var listaTodos = _repository.GetAll().Select(s => new TodoAdminViewModel
             {
                 Description = s.Description,
                 ExpirationDate = (DateTime)s.ExpirationDate,
                 Email = s.User.Email,
                 Id = s.Id
-            }).ToList();
-            return PaginatedList<TodoAdminViewModel>.Create(listaTodos, pageNumber, pageSize);
-
+            });
+            var listPag = await PaginatedList<TodoAdminViewModel>.CreateAsync(listaTodos, pageNumber, pageSize);
+            return listPag;
         }
 
         public async Task<PaginatedList<TodoAdminViewModel>> GetAllExpired(int pageNumber, int pageSize)
         {
-            if(pageSize == 0) pageSize = 15;
+            if (pageSize == 0) pageSize = 15;
 
-            var listaTodos = (await _repository.GetAllAsync()).Select(s => new TodoAdminViewModel
+            var listaTodos = _repository.GetAllExpired().Select(s => new TodoAdminViewModel
             {
                 Description = s.Description,
                 ExpirationDate = (DateTime)s.ExpirationDate,
                 Email = s.User.Email,
                 Id = s.Id
-            }).ToList();
-            return PaginatedList<TodoAdminViewModel>.Create(listaTodos, pageNumber, pageSize);
+            });
+            return await PaginatedList<TodoAdminViewModel>.CreateAsync(listaTodos, pageNumber, pageSize);
         }
 
         public async Task<TodoViewModel> Add(TodoEditViewModel todoVm, int userId)
@@ -69,9 +70,18 @@ namespace DesafioUbistart.Services
             await _repository.ConcludeAsync(todoId);
         }
 
+        public async Task<bool> IsExistsAsync(int todoId)
+        {
+            return await _repository.TodoIsExistsAsync(todoId);
+        }
+
+        public async Task<bool> IsDoneAsync(int todoId)
+        {
+            return await _repository.TodoIsDoneAsync(todoId);
+        }
+
         public async Task<TodoViewModel> Edit(TodoEditViewModel todoVm, int todoId, int userId)
         {
-            if (!(await _repository.ExistsTodoAsync(todoId))) return null;
             var todoIten = await _repository.Get(todoId);
             if (todoIten.UserId != userId) return null;
 

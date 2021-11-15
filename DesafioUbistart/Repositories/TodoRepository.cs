@@ -22,21 +22,26 @@ namespace DesafioUbistart.Repositories
             return await _db.Todos.FirstOrDefaultAsync(p => p.Id == todoId);
         }
 
-        public async Task<List<Todo>> GetAllAsync()
+        public IQueryable<Todo> GetAll()
         {
             var listaTodos = new List<Todo>();
-            return await _db.Todos.Include(i => i.User).AsNoTracking().ToListAsync();
+            return _db.Todos.Include(i => i.User).AsNoTracking();
         }
 
-        public async Task<List<Todo>> GetAllExpiredAsync()
+        public IQueryable<Todo> GetAllExpired()
         {
             var listaTodos = new List<Todo>();
-            return await _db.Todos.Include(i => i.User).AsNoTracking().Where(p => p.ExpirationDate > DateTime.UtcNow).ToListAsync();
+            return _db.Todos.Include(i => i.User).AsNoTracking().Where(p => p.ExpirationDate < DateTime.UtcNow);
         }
 
-        public async Task<bool> ExistsTodoAsync(int todoId)
+        public async Task<bool> TodoIsExistsAsync(int todoId)
         {
             return await _db.Todos.AnyAsync(p => p.Id == todoId);
+        }
+
+        public async Task<bool> TodoIsDoneAsync(int todoId)
+        {
+            return (await _db.Todos.FirstOrDefaultAsync(p => p.Id == todoId)).Done;
         }
 
         public async Task<List<Todo>> GetAllByUserAsync(int userId)

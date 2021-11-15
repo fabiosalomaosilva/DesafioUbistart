@@ -73,9 +73,25 @@ namespace DesafioUbistart
                         In = ParameterLocation.Header,
                         Description = "Autenticação baseada em JWT",
                         Name = "Authorization",
+                        Scheme = "bearer",
                         Type = SecuritySchemeType.ApiKey
                     }
                 );
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                          new OpenApiSecurityScheme
+                            {
+                                Reference = new OpenApiReference
+                                {
+                                    Type = ReferenceType.SecurityScheme,
+                                    Id = "bearer"
+                                }
+                            },
+                            new string[] {}
+                    }
+                });
+
             });
         }
 
